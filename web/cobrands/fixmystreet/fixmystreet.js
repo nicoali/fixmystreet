@@ -21,23 +21,26 @@ function isR2L() {
     // that doesn't change the main content at all.
     small_drawer: function(id) {
         var $this = $(this), d = $('#' + id);
-        this.toggle(function() {
-            if (opened) {
-                opened.click();
+        this.click(function(e) {
+            e.preventDefault();
+            if (!$this.hasClass('hover')) {
+                if (opened) {
+                    opened.click();
+                }
+                if (!$this.addClass('hover').data('setup')) {
+                    d.hide().removeClass('hidden-js').css({
+                    padding: '1em',
+                    background: '#fff'
+                    });
+                    $this.data('setup', true);
+                }
+                d.slideDown();
+                opened = $this;
+            } else {
+                $this.removeClass('hover');
+                d.slideUp();
+                opened = null;
             }
-            if (!$this.addClass('hover').data('setup')) {
-                d.hide().removeClass('hidden-js').css({
-                padding: '1em',
-                background: '#fff'
-                });
-                $this.data('setup', true);
-            }
-            d.slideDown();
-            opened = $this;
-        }, function(e) {
-            $this.removeClass('hover');
-            d.slideUp();
-            opened = null;
         });
     },
 
@@ -56,58 +59,62 @@ function isR2L() {
         var $drawer = $('#' + id);
 
         this.off('click');
-        this.toggle(function() {
-            // Find the specified drawer, or create it if it doesn't exist
-            if ($drawer.length === 0) {
-                $drawer = $('<div id="' + id + '">');
-                $drawer.appendTo($swparent);
-            }
-
-            if (!$this.addClass('hover').data('setup')) {
-                // Optionally fill $drawer with HTML from an AJAX data source
-                if (ajax) {
-                    var href = $this.attr('href') + ';ajax=1';
-                    var margin = isR2L() ? 'margin-left' : 'margin-right';
-                    var $ajax_result = $('<div>').appendTo($drawer);
-                    $ajax_result.html('<p style="text-align:center">Loading</p>');
-                    $ajax_result.load(href);
+        this.click(function(e) {
+            e.preventDefault();
+            var drawer_top;
+            if (!$this.hasClass('hover')) {
+                // Find the specified drawer, or create it if it doesn't exist
+                if ($drawer.length === 0) {
+                    $drawer = $('<div id="' + id + '">');
+                    $drawer.appendTo($swparent);
                 }
 
-                // Style up the $drawer
-                var drawer_top = $(window).height() - $sw.height();
-                var drawer_css = {
-                    position: 'fixed',
-                    zIndex: 10,
-                    top: drawer_top,
-                    bottom: 0,
-                    width: $sidebar.css('width'),
-                    paddingLeft: $sidebar.css('padding-left'),
-                    paddingRight: $sidebar.css('padding-right'),
-                    overflow: 'auto',
-                    background: '#fff'
-                };
-                drawer_css[isR2L() ? 'right' : 'left'] = 0;
-                $drawer.css(drawer_css).removeClass('hidden-js').find('h2').css({ marginTop: 0 });
-                $this.data('setup', true);
+                if (!$this.addClass('hover').data('setup')) {
+                    // Optionally fill $drawer with HTML from an AJAX data source
+                    if (ajax) {
+                        var href = $this.attr('href') + ';ajax=1';
+                        var margin = isR2L() ? 'margin-left' : 'margin-right';
+                        var $ajax_result = $('<div>').appendTo($drawer);
+                        $ajax_result.html('<p style="text-align:center">Loading</p>');
+                        $ajax_result.load(href);
+                    }
+
+                    // Style up the $drawer
+                    drawer_top = $(window).height() - $sw.height();
+                    var drawer_css = {
+                        position: 'fixed',
+                        zIndex: 10,
+                        top: drawer_top,
+                        bottom: 0,
+                        width: $sidebar.css('width'),
+                        paddingLeft: $sidebar.css('padding-left'),
+                        paddingRight: $sidebar.css('padding-right'),
+                        overflow: 'auto',
+                        background: '#fff'
+                    };
+                    drawer_css[isR2L() ? 'right' : 'left'] = 0;
+                    $drawer.css(drawer_css).removeClass('hidden-js').find('h2').css({ marginTop: 0 });
+                    $this.data('setup', true);
+                }
+
+                // Insert the .shadow-wrap controls into the top of the drawer.
+                $sw.addClass('static').prependTo($drawer);
+
+                // Animate the drawer into place, enitrely covering the sidebar.
+                var sidebar_top_px = $sidebar.position().top;
+                $drawer.show().animate({ top: sidebar_top_px }, 1000);
+
+            } else {
+                // Slide the drawer down, move the .shadow-wrap back to its
+                // original parent, and hide the drawer for potential re-use later.
+                $this.removeClass('hover');
+                drawer_top = $(window).height() - $sw.height();
+
+                $drawer.animate({ top: drawer_top }, 1000, function() {
+                    $sw.removeClass('static').appendTo($swparent);
+                    $drawer.hide();
+                });
             }
-
-            // Insert the .shadow-wrap controls into the top of the drawer.
-            $sw.addClass('static').prependTo($drawer);
-
-            // Animate the drawer into place, enitrely covering the sidebar.
-            var sidebar_top_px = $sidebar.position().top;
-            $drawer.show().animate({ top: sidebar_top_px }, 1000);
-
-        }, function(e) {
-            // Slide the drawer down, move the .shadow-wrap back to its
-            // original parent, and hide the drawer for potential re-use later.
-            $this.removeClass('hover');
-            var drawer_top = $(window).height() - $sw.height();
-
-            $drawer.animate({ top: drawer_top }, 1000, function() {
-                $sw.removeClass('static').appendTo($swparent);
-                $drawer.hide();
-            });
         });
     },
 
@@ -263,7 +270,7 @@ $.extend(fixmystreet.set_up, {
     $('#pc').focus();
 
     // In case we've come here by clicking back to a form that disabled a submit button
-    $('form.validate input[type=submit]').removeAttr('disabled');
+    $('form.validate input[type=submit]').prop('disabled', false);
 
     $('[data-confirm]').on('click', function() {
         return confirm(this.getAttribute('data-confirm'));
@@ -749,7 +756,7 @@ $.extend(fixmystreet.set_up, {
             $('input[type=submit]', $context).prop("disabled", true).removeClass('green-btn');
           });
           this.on("queuecomplete", function() {
-            $('input[type=submit]', $context).removeAttr('disabled').addClass('green-btn');
+            $('input[type=submit]', $context).prop('disabled', false).addClass('green-btn');
           });
           this.on("success", function(file, xhrResponse) {
             var ids = $('input[name=upload_fileid]', $context).val().split(','),
@@ -1542,25 +1549,28 @@ fixmystreet.display = {
         });
 
         // mobile user clicks 'ok' on map
-        $('#mob_ok').toggle(function(){
-            //scroll the height of the map box instead of the offset
-            //of the #side-form or whatever as we will probably want
-            //to do this on other pages where #side-form might not be
-            $('html, body').animate({ scrollTop: height-60 }, 500, function(){
-                $('html').removeClass('only-map');
-                $('#mob_sub_map_links').addClass('map_complete');
-                $('#mob_ok').text(translation_strings.map);
-            });
-        }, function(){
-            var current = $('html, body').scrollTop();
-            $('html, body').animate({ scrollTop: 0 }, 500/height*current, function(){
-                $('html').addClass('only-map');
-                $('#mob_sub_map_links').removeClass('map_complete');
-                $('#mob_ok').text(translation_strings.ok);
-                if (fixmystreet.duplicates) {
-                    fixmystreet.duplicates.hide();
-                }
-            });
+        $('#mob_ok').click(function(e){
+            e.preventDefault();
+            if ($('html').hasClass('only-map')) {
+                //scroll the height of the map box instead of the offset
+                //of the #side-form or whatever as we will probably want
+                //to do this on other pages where #side-form might not be
+                $('html, body').animate({ scrollTop: height-60 }, 500, function(){
+                    $('html').removeClass('only-map');
+                    $('#mob_sub_map_links').addClass('map_complete');
+                    $('#mob_ok').text(translation_strings.map);
+                });
+            } else {
+                var current = $('html, body').scrollTop();
+                $('html, body').animate({ scrollTop: 0 }, 500/height*current, function(){
+                    $('html').addClass('only-map');
+                    $('#mob_sub_map_links').removeClass('map_complete');
+                    $('#mob_ok').text(translation_strings.ok);
+                    if (fixmystreet.duplicates) {
+                        fixmystreet.duplicates.hide();
+                    }
+                });
+            }
         });
     }
 

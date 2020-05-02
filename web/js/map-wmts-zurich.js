@@ -110,13 +110,9 @@ fixmystreet.maps.matrix_ids = [
         fixmystreet.maps.base_layer_aerial = true;
         $('.map-layer-toggle').click(fixmystreet.maps.toggle_base);
 
-        /* Admin dragging of pin */
+        /* admin dragging of pin */
         if (fixmystreet.page == 'admin') {
-            if ($.browser.msie) {
-                $(window).load(function() { fixmystreet.maps.admin_drag(pin_dragged, true); });
-            } else {
-                fixmystreet.maps.admin_drag(pin_dragged, true);
-            }
+            fixmystreet.maps.admin_drag(pin_dragged, true);
         }
     });
 
