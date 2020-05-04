@@ -12,7 +12,7 @@ describe('new report form', function() {
   });
 
   it('is hidden when emergency option is yes', function() {
-    cy.get('select:eq(4)').select('Fallen branch');
+    cy.get('select').eq(4).select('Fallen branch');
     cy.get('#form_emergency').select('yes');
     cy.get('#js-category-stopper').should('contain', 'Please phone customer services to report this problem.');
     cy.get('.js-hide-if-invalid-category').should('be.hidden');
@@ -22,7 +22,7 @@ describe('new report form', function() {
   });
 
   it('is hidden when private land option is yes', function() {
-    cy.get('select:eq(4)').select('Fallen branch');
+    cy.get('select').eq(4).select('Fallen branch');
     cy.get('#form_private_land').select('yes');
     cy.get('#js-category-stopper').should('contain', 'The council do not have powers to address issues on private land.');
     cy.get('.js-hide-if-invalid-category').should('be.hidden');
@@ -32,9 +32,9 @@ describe('new report form', function() {
   });
 
   it('correctly changes the asset select message', function() {
-    cy.get('select:eq(4)').select('Street lighting');
+    cy.get('select').eq(4).select('Street lighting');
     cy.get('.category_meta_message').should('contain', 'You can pick a light from the map');
-    cy.get('select:eq(4)').select('Trees');
+    cy.get('select').eq(4).select('Trees');
     cy.get('.category_meta_message').should('contain', 'You can pick a tree from the map');
   });
 
@@ -42,10 +42,10 @@ describe('new report form', function() {
     cy.fixture('peterborough_roadworks.json');
     cy.route('/streetmanager.php**', 'fixture:peterborough_roadworks.json').as('roadworks');
     cy.wait('@roadworks');
-    cy.get('select:eq(4)').select('Pothole');
+    cy.get('select').eq(4).select('Pothole');
     cy.contains('Roadworks are scheduled near this location').should('be.visible');
     cy.contains('Parapet improvement').should('be.visible');
-    cy.get('select:eq(4)').select('Fallen branch');
+    cy.get('select').eq(4).select('Fallen branch');
     cy.should('not.contain', 'Roadworks are scheduled near this location');
   });
 

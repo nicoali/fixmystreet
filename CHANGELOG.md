@@ -14,6 +14,8 @@
         - Improve layout of some admin pages.
     - Security:
         - Increase minimum password length to eight.
+    - Development improvements:
+        - Drop support for IE8, upgrade jQuery. #3017
 
 * v3.1 (16th November 2020)
     - Security:

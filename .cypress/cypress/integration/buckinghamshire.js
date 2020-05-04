@@ -17,14 +17,14 @@ describe('buckinghamshire cobrand', function() {
     cy.wait('@roads-layer');
     cy.get('#map_box').click(290, 307);
     cy.wait('@report-ajax');
-    cy.get('select:eq(4)').select('Parks');
+    cy.get('select').eq(4).select('Parks');
     cy.get('[name=site_code]').should('have.value', '7300268');
   });
 
   it('uses the label "Full name" for the name field', function() {
     cy.get('#map_box').click(290, 307);
     cy.wait('@report-ajax');
-    cy.get('select:eq(4)').select('Flytipping');
+    cy.get('select').eq(4).select('Flytipping');
     cy.wait('@around-ajax');
 
     cy.get('[name=title]').type('Title');

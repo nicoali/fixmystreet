@@ -39,13 +39,13 @@ describe('Basic categories', function() {
         cy.get('#map_box').click(240, 249);
         cy.wait('@report-ajax');
         cy.get('[name=category]').should('not.be.visible');
-        cy.get('select:eq(3) option').each(function (obj, i) {
+        cy.get('select').eq(3).find('option').each(function (obj, i) {
             expect(obj[0].value).to.equal(categories[i]);
         });
         cy.get('#subcategory_Bins').should('not.be.visible');
-        cy.get('select:eq(3)').select('Bins');
+        cy.get('select').eq(3).select('Bins');
         cy.get('#subcategory_Bins').should('be.visible');
-        cy.get('select:eq(3)').select('Graffiti');
+        cy.get('select').eq(3).select('Graffiti');
         cy.get('#subcategory_Bins').should('not.be.visible');
     });
 
@@ -54,12 +54,12 @@ describe('Basic categories', function() {
         cy.route('/report/new/ajax*').as('report-ajax');
         cy.visit('/report/new?latitude=51.496194&longitude=-2.603439');
         cy.get('[name=category]').should('not.be.visible');
-        cy.get('select:eq(1) option').each(function (obj, i) {
+        cy.get('select').eq(1).find('option').each(function (obj, i) {
             expect(obj[0].value).to.equal(categories[i]);
         });
         cy.get('#subcategory_Bins').should('not.be.visible');
         cy.wait('@report-ajax');
-        cy.get('select:eq(1)').select('Bins');
+        cy.get('select').eq(1).select('Bins');
         cy.get('#subcategory_Bins').should('be.visible');
     });
 });
