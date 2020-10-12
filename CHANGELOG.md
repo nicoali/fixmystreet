@@ -13,6 +13,7 @@
         - Select matches for both filter category and group. #3110
         - Add an extra zoom level to most map types. #3130
         - Improve new report form when using phone verification.
+        – Improve affordability of map buttons on mobile
     - Changes:
         - Mark user as active when sent an email alert.
     - Bugfixes:
