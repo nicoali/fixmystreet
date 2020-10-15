@@ -37,7 +37,8 @@ create table users (
     facebook_id     bigint  unique,
     oidc_ids        text    ARRAY,
     area_ids        integer ARRAY,
-    extra           text
+    extra           text,
+    extra_json      jsonb
 );
 CREATE UNIQUE INDEX users_email_verified_unique ON users (email) WHERE email_verified;
 CREATE UNIQUE INDEX users_phone_verified_unique ON users (phone) WHERE phone_verified;
@@ -67,7 +68,8 @@ create table body (
     blank_updates_permitted boolean not null default 'f',
     convert_latlong boolean not null default 'f',
     deleted boolean not null default 'f',
-    extra           text
+    extra text,
+    extra_json jsonb
 );
 
 create table body_areas (
@@ -119,6 +121,7 @@ create table contacts (
 
     -- extra fields required for open311
     extra text,
+    extra_json jsonb,
 
     -- for things like missed bin collections
     non_public boolean default 'f',
@@ -222,8 +225,10 @@ create table problem (
     whensent timestamp,
     send_questionnaire boolean not null default 't',
     extra text, -- extra fields required for open311
+    extra_json jsonb,
     flagged boolean not null default 'f',
     geocode bytea,
+    geocode_json jsonb,
     response_priority_id int REFERENCES response_priorities(id),
 
     -- logging sending failures (used by webservices)
@@ -357,6 +362,7 @@ create table comment (
     -- and should be highlighted in the display?
     external_id text,
     extra text,
+    extra_json jsonb,
     send_fail_count integer not null default 0,
     send_fail_reason text,
     send_fail_timestamp timestamp,
@@ -378,9 +384,11 @@ create table token (
     scope text not null,
     token text not null,
     data bytea not null,
+    data_json jsonb,
     created timestamp not null default current_timestamp,
     primary key (scope, token)
 );
+ALTER TABLE token ADD CONSTRAINT token_data_not_null CHECK (data_json IS NOT NULL) NOT VALID;
 
 -- Alerts
 
@@ -495,6 +503,7 @@ create table moderation_original_data (
     created timestamp not null default current_timestamp,
 
     extra text,
+    extra_json jsonb,
     category text,
     latitude double precision,
     longitude double precision
@@ -547,6 +556,7 @@ CREATE TABLE defect_types (
     name text not null,
     description text not null,
     extra text,
+    extra_json jsonb,
     unique(body_id, name)
 );
 
@@ -574,7 +584,8 @@ CREATE TABLE report_extra_fields (
     name text not null,
     cobrand text,
     language text,
-    extra text
+    extra text,
+    extra_json jsonb
 );
 
 CREATE TABLE state (
