@@ -21,9 +21,7 @@ __PACKAGE__->add_columns(
   "token",
   { data_type => "text", is_nullable => 0 },
   "data",
-  { data_type => "bytea", is_nullable => 0 },
-  "data_json",
-  { data_type => "jsonb", is_nullable => 1 },
+  { data_type => "jsonb", is_nullable => 0 },
   "created",
   {
     data_type     => "timestamp",
@@ -34,8 +32,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("scope", "token");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-14 22:49:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UE9FC+y+u1zEce97jnjhvg
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-15 15:56:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GkNGJrdW184iwKIlmQssUQ
 
 use mySociety::AuthToken;
 
@@ -52,20 +50,6 @@ AuthToken would do it. 'token' is set to a new random value by default and the
 'created' timestamp is achieved using the database function current_timestamp.
 
 =cut
-
-__PACKAGE__->load_components("+FixMyStreet::DB::RABXColumn");
-__PACKAGE__->rabx_column('data');
-
-# XXX Temporary for RABX migration
-use Moo;
-around set_filtered_column => sub {
-    my ($orig, $self, $col, $filtered) = @_;
-    if ($col eq 'data') {
-        $self->$orig(data_json => $filtered);
-    }
-    return $self->$orig($col, $filtered);
-};
-# XXX Temporary for RABX migration
 
 sub new {
     my ( $class, $attrs ) = @_;

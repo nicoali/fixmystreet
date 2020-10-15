@@ -64,8 +64,6 @@ __PACKAGE__->add_columns(
   "area_ids",
   { data_type => "integer[]", is_nullable => 1 },
   "extra",
-  { data_type => "text", is_nullable => 1 },
-  "extra_json",
   { data_type => "jsonb", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
@@ -132,16 +130,13 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-14 22:49:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:H+oO0UQ5DHsihgrgPkXtAQ
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-15 15:55:51
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:G8V+eqQq0D9D+8jOx6ir+g
 
 # These are not fully unique constraints (they only are when the *_verified
 # is true), but this is managed in ResultSet::User's find() wrapper.
 __PACKAGE__->add_unique_constraint("users_email_verified_key", ["email", "email_verified"]);
 __PACKAGE__->add_unique_constraint("users_phone_verified_key", ["phone", "phone_verified"]);
-
-__PACKAGE__->load_components("+FixMyStreet::DB::RABXColumn");
-__PACKAGE__->rabx_column('extra');
 
 use Moo;
 use Text::CSV;

@@ -38,8 +38,6 @@ __PACKAGE__->add_columns(
   "note",
   { data_type => "text", is_nullable => 0 },
   "extra",
-  { data_type => "text", is_nullable => 1 },
-  "extra_json",
   { data_type => "jsonb", is_nullable => 1 },
   "non_public",
   { data_type => "boolean", default_value => \"false", is_nullable => 1 },
@@ -80,11 +78,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-14 22:49:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QyPwCWsz+ivYQnuBJ3BRSw
-
-__PACKAGE__->load_components("+FixMyStreet::DB::RABXColumn");
-__PACKAGE__->rabx_column('extra');
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-15 15:56:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FU4S2mhLbzHvqEb1KEUdGQ
 
 use Moo;
 use namespace::clean -except => [ 'meta' ];

@@ -1,6 +1,8 @@
 ## Releases
 
 * Unreleased
+    - Development improvements:
+        - Extra data columns now stored as JSON, not RABX.
 
 * v3.1 (16th November 2020)
     - Security:

@@ -42,8 +42,6 @@ __PACKAGE__->add_columns(
     is_nullable   => 0,
   },
   "extra",
-  { data_type => "text", is_nullable => 1 },
-  "extra_json",
   { data_type => "jsonb", is_nullable => 1 },
   "category",
   { data_type => "text", is_nullable => 1 },
@@ -72,8 +70,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-14 22:49:08
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AstG0MNd+QX+gb4+STSJFg
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2020-10-15 15:56:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6XV/tBey31rfGYzCX1+j5g
 
 use Moo;
 use FixMyStreet::Template::SafeString;
@@ -81,9 +79,6 @@ use Text::Diff;
 use Data::Dumper;
 
 with 'FixMyStreet::Roles::Extra';
-
-__PACKAGE__->load_components("+FixMyStreet::DB::RABXColumn");
-__PACKAGE__->rabx_column('extra');
 
 sub admin_log {
     my $self = shift;

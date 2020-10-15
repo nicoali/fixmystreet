@@ -12,7 +12,7 @@ use FixMyStreet::Template::SafeString;
 use FixMyStreet::Template::Context;
 use FixMyStreet::Template::Stash;
 
-use RABX;
+use JSON::MaybeXS;
 use IO::String;
 
 my %FILTERS;
@@ -174,8 +174,7 @@ sub email_sanitize_text : Fn('email_sanitize_text') {
 
     my $text = $update->{item_text};
     my $extra = $update->{item_extra};
-    utf8::encode($extra) if $extra;
-    $extra = $extra ? RABX::wire_rd(new IO::String($extra)) : {};
+    $extra = $extra ? JSON->new->decode($extra) : {};
 
     my $staff = $extra->{is_superuser} || $extra->{is_body_user};
 
@@ -234,8 +233,7 @@ sub email_sanitize_html : Fn('email_sanitize_html') {
 
     my $text = $update->{item_text};
     my $extra = $update->{item_extra};
-    utf8::encode($extra) if $extra;
-    $extra = $extra ? RABX::wire_rd(new IO::String($extra)) : {};
+    $extra = $extra ? JSON->new->decode($extra) : {};
 
     my $staff = $extra->{is_superuser} || $extra->{is_body_user};
 
