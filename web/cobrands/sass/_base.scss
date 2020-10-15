@@ -1876,6 +1876,33 @@ html.js #map .noscript {
     background: #000;
 }
 
+// Make mobile buttons look better 
+#problems_nearby {
+  @extend .btn;
+  border-left: 0;
+}
+
+#mob_ok,
+#try_again {
+  @extend .btn-primary;
+}
+
+#problems_nearby,
+#mob_ok,
+#try_again {
+  letter-spacing: 0.5px;
+  color: #000 !important;
+  border-radius: 0;
+  border-right: 0;
+  &:hover,
+  &:active,
+  &:focus {
+    color: #000 !important;
+  }
+}
+
+
+
 // On mobile, once #mob_ok has been pressed, the new report form is shown,
 // and .sub-map-links transforms into a completely different-looking set
 // of buttons for return back to the map.
@@ -1898,12 +1925,10 @@ html.js #map .noscript {
         bottom: 0;
     }
 
-    // Turn #try_again into a black button, centred above the viewport.
+    // Centre #try_again above the viewport.
     #try_again {
         #{$left}: 25%; // along with width of 50%, centres it
         margin-bottom: 6em;
-        background: rgba(0, 0, 0, 0.8);
-        @include border-radius(0.5em);
     }
 
     // Turn #mob_ok into a white "tab" overlapping the map.
@@ -1911,8 +1936,8 @@ html.js #map .noscript {
         #{$right}: 1em;
         width: 4em;
         background: #fff;
-        color: #000;
-
+        color: #000 !important;
+        border: 0;
         // "Down" arrow.
         &:before {
             content: "";
