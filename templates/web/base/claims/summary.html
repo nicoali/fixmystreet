@@ -1,0 +1,397 @@
+[% SET bodyclass = 'claims' %]
+
+[% USE date(format = '%A, %-d~~~ %B') ~%]
+[% PROCESS 'claims/govuk/fields.html' ~%]
+[% INCLUDE header.html %]
+
+[% PROCESS errors %]
+[% SET data = form.saved_data ~%]
+
+[% BLOCK format_value -%]
+    [% IF field.block == 'yes_no' %]
+        [% field.value == 1 ? 'Yes' : 'No' %]
+    [% END %]
+[%- END %]
+
+[%
+    summary = [
+        {
+            stage => 'start',
+            title => "About claim",
+            fields => [
+                {
+                    desc => "What are you claiming for?",
+                    value => data.what
+                },
+                {
+                    block => 'yes_no',
+                    desc => "Claimed before",
+                    value => 1 # XXX
+                }
+            ]
+        },
+        {
+            stage => 'about_you',
+            title => "About you",
+            fields => [
+                {
+                    desc => "Name",
+                    value => data.name
+                },
+                {
+                    desc => "Email",
+                    value => data.email
+                },
+                {
+                    desc => "Phone",
+                    value => data.phone
+                },
+                {
+                    desc => "Address",
+                    value => data.address
+                },
+            ]
+        },
+        {
+            stage => 'about_fault',
+            title => "About the fault",
+            fields => [
+                {
+                    desc => "Fault ID",
+                    value => data.report_id
+                },
+            ]
+        },
+        {
+            stage => 'when',
+            title => "When did the incident happen?",
+            fields => [
+                {
+                    desc => "Date",
+                    value => data.date
+                },
+                {
+                    desc => "Time",
+                    value => data.time
+                },
+            ]
+        },
+        {
+            stage => 'details',
+            title => "What are the details of the incident",
+            fields => [
+                {
+                    desc => "Weather",
+                    value => data.weather
+                },
+                {
+                    desc => "Direction",
+                    hide => data.what != 0,
+                    value => data.direction
+                },
+                {
+                    desc => "Details",
+                    value => data.details
+                },
+                {
+                    desc => "In Vehicle",
+                    hide => data.what != 0,
+                    block => 'yes_no',
+                    value => data.in_vehicle
+                },
+                {
+                    desc => "Speed",
+                    hide => data.what != 0,
+                    value => data.speed
+                },
+                {
+                    desc => "Actions",
+                    hide => data.what != 0,
+                    value => data.actions
+                },
+            ]
+        },
+        {
+            stage => 'witnesses',
+            title => "Witnesses and police",
+            fields => [
+                {
+                    desc => "Were there any witnesses",
+                    block => 'yes_no',
+                    value => data.witnesses
+                },
+                {
+                    desc => "Witness details",
+                    hide => data.witnesses != 1,
+                    value => data.witness_details
+                },
+                {
+                    desc => "Did you report the incident to the police?",
+                    block => 'yes_no',
+                    value => data.report_police
+                },
+                {
+                    desc => "Incident Number",
+                    hide => data.report_police != 1,
+                    value => data.incident_number
+                },
+            ]
+        },
+        {
+            stage => 'cause',
+            title => "What caused the incident",
+            fields => [
+                {
+                    desc => "What was the cause of the incident",
+                    value => data.what_cause
+                },
+                {
+                    desc => "Were you aware of it before",
+                    block => 'yes_no',
+                    value => data.aware
+                },
+                {
+                    desc => "Where was the cause of the incident?",
+                    value => data.where_cause
+                },
+                {
+                    desc => "Describe the incident cause",
+                    value => data.describe_cause
+                },
+                {
+                    desc => "Photos of incident",
+                    value => data.photos
+                },
+            ]
+        },
+        {
+            stage => 'about_vehicle',
+            hide => data.what != 0,
+            title => "About the vehicle",
+            fields => [
+                {
+                    desc => "Make",
+                    value => data.make
+                },
+                {
+                    desc => "Registration",
+                    value => data.registration
+                },
+                {
+                    desc => "Mileage",
+                    value => data.mileage
+                },
+                {
+                    desc => "V5",
+                    value => data.v5
+                },
+                {
+                    desc => "V5 in your name",
+                    block => 'yes_no',
+                    value => data.v5_in_name
+                },
+                {
+                    desc => "Insurer Address",
+                    value => data.insurer_address
+                },
+                {
+                    desc => "Are you making a claim via insurer?",
+                    block => 'yes_no',
+                    value => data.damage_claim
+                },
+                {
+                    desc => "Are you registered for VAT?",
+                    block => 'yes_no',
+                    value => data.vat_reg
+                },
+            ]
+        },
+        {
+            stage => 'damage_vehicle',
+            hide => data.what != 0,
+            title => "What was the damage to the vehicle",
+            fields => [
+                {
+                    desc => "Describe the damage to the vehicle",
+                    value => data.vehicle_damage
+                },
+                {
+                    desc => "Please provide photos of the damage to the vehicle",
+                    value => data.vehicle_photos
+                },
+                {
+                    desc => "Please provide receipted invoices for the repairs",
+                    value => data.vehicle_receipts
+                },
+                {
+                    desc => "Are you claiming for tyre damage?",
+                    block => 'yes_no',
+                    value => data.tyre_damage
+                },
+                {
+                    desc => "Tyre mileage",
+                    hide => data.tyre_damage != 1,
+                    value => data.tyre_mileage
+                },
+                {
+                    desc => "Please provide copy of the tyre purchase receipts",
+                    hide => data.tyre_damage != 1,
+                    value => data.tyre_receipts
+                },
+            ]
+        },
+        {
+            stage => 'about_property',
+            hide => data.what != 1,
+            title => "About the property",
+            fields => [
+                {
+                    desc => "Copy of insurance",
+                    value => data.property_insurance
+                },
+            ]
+        },
+        {
+            stage => 'damage_property',
+            hide => data.what != 1,
+            title => "What was the damage to the property?",
+            fields => [
+                {
+                    desc => "Describe the damage to the property",
+                    value => data.property_damage_description
+                },
+                {
+                    desc => "Photos",
+                    value => data.property_photos
+                },
+                {
+                    desc => "Invoices",
+                    value => data.property_invoices
+                },
+            ]
+        },
+        {
+            stage => 'about_you_personal',
+            title => "About you",
+            hide => data.what != 2,
+            fields => [
+                {
+                    desc => "Date of Borth",
+                    value => data.dob
+                },
+                {
+                    desc => "National Insurance Number",
+                    value => data.ni_number
+                },
+                {
+                    desc => "Occupation",
+                    value => data.occupation
+                },
+                {
+                    desc => "Employer details",
+                    value => data.employer_contact
+                },
+            ]
+        },
+        {
+            stage => 'injuries',
+            hide => data.what != 2,
+            title => "About your injuries",
+            fields => [
+                {
+                    desc => "Descrit the injuries you sustained",
+                    value => data.describe_injuries
+                },
+                {
+                    desc => "Did you seek medical attention",
+                    block => 'yes_no',
+                    value => data.medical_attention
+                },
+                {
+                    desc => "Date you received medical attention",
+                    value => data.attention_date
+                },
+                {
+                    desc => "GP or hospital contact details",
+                    value => data.gp_contact
+                },
+                {
+                    desc => "Absent from work",
+                    block => 'yes_no',
+                    value => data.absent_work
+                },
+                {
+                    desc => "Dates of absences",
+                    value => data.absence_dates
+                },
+                {
+                    desc => "Are you having ongoing treatment?",
+                    block => 'yes_no',
+                    value => data.ongoing_treatment
+                },
+                {
+                    desc => "Treatment Details",
+                    value => data.treatment_details
+                },
+            ]
+        },
+    ]
+%]
+
+<h1 class="govuk-heading-xl">[% form.title %]</h1>
+<p>Please review all information provided and make sure all is correct and all documents attached before submitting your claim</p>
+
+<div class="claims__summary">
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      [% summary_title %]
+    </dt>
+    <dd class="govuk-summary-list__value">
+    </dd>
+    <dd class="govuk-summary-list__actions">
+    <form method="post">
+        <input type="hidden" name="saved_data" value="[% form.fif.saved_data %]">
+        <input type="hidden" name="goto" value="[% step1 %]">
+        <input type="submit" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" value="Change answers">
+    </form>
+    </dd>
+  </div>
+
+  [% FOR stage IN summary %]
+      [% NEXT IF stage.hide %]
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          [% stage.title %]
+        </dt>
+        <dd class="govuk-summary-list__value">
+        </dd>
+        <dd class="govuk-summary-list__actions">
+        <form method="post">
+            <input type="hidden" name="saved_data" value="[% form.fif.saved_data %]">
+            <input type="hidden" name="goto" value="[% stage.stage %]">
+            <input type="submit" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" value="Change answers">
+        </form>
+        </dd>
+      </div>
+      [% FOR field IN stage.fields %]
+      [% NEXT IF field.hide %]
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-summary-list__key--sub">[% field.desc %]</dt>
+            [% IF field.block %]
+            <dd class="govuk-summary-list__value">[% INCLUDE format_value field=field %]</dd>
+            [% ELSE %]
+            <dd class="govuk-summary-list__value">[% field.value %]</dd>
+            [% END %]
+        </div>
+       [% END %]
+  [% END %]
+
+</dl>
+
+<form method="post">
+    [% PROCESS form %]
+</form>
+</div>
+
+[% INCLUDE footer.html %]
