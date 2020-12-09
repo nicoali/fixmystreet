@@ -96,7 +96,9 @@ has_field location => (
 has_page when => (
     fields => ['date', 'time', 'continue'],
     title => 'When did the incident happen',
-    next => 'details',
+    next => sub {
+            $_[0]->{what} == 0 ? 'details_vehicle' : 'details_no_vehicle'
+        },
 );
 
 has_field date => (
@@ -112,8 +114,14 @@ has_field time => (
     label => 'What time did the incident happen?',
 );
 
-has_page details => (
+has_page details_vehicle => (
     fields => ['weather', 'direction', 'details', 'in_vehicle', 'speed', 'actions', 'continue'],
+    title => 'What are the details of the incident',
+    next => 'witnesses',
+);
+
+has_page details_no_vehicle => (
+    fields => ['weather', 'direction', 'details', 'continue'],
     title => 'What are the details of the incident',
     next => 'witnesses',
 );
@@ -125,7 +133,7 @@ has_field weather => (
 );
 
 has_field direction => (
-    required => 1,
+    required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     label => 'What direction were you travelling in at the time',
 );
@@ -140,7 +148,7 @@ has_field details => (
 has_field in_vehicle => (
     type => 'Select',
     widget => 'RadioGroup',
-    required => 1,
+    required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     label => 'Where you in a vehicle when the incident happened?',
     options => [
         { label => 'Yes', value => '1' },
@@ -149,13 +157,13 @@ has_field in_vehicle => (
 );
 
 has_field speed => (
-    required => 1,
+    required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     label => 'What speed was the vehicle travelling?',
 );
 
 has_field actions => (
-    required => 1,
+    required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     widget => 'Textarea',
     label => 'If you were not driving, what were you doing when the incident happened?',
@@ -206,8 +214,8 @@ has_page cause => (
     title => 'What caused the incident?',
     next => sub {
             $_[0]->{what} == 0 ? 'about_vehicle' :
-            $_[0]->{what} == 1 ? 'about_property' :
-            'about_you_personal',
+            $_[0]->{what} == 1 ? 'about_you_personal' :
+            'about_property',
         },
 );
 
@@ -365,6 +373,13 @@ has_field tyre_damage => (
 has_field tyre_mileage => (
     type => 'Text',
     label => 'Tyre Mileage',
+    required_when => { 'tyre_damage' => 1 },
+);
+
+has_field tyre_receipts => (
+    type => 'Text',
+    label => 'Please provide copy of tyre purchase receipts',
+    required_when => { 'tyre_damage' => 1 },
 );
 
 has_field tyre_receipts => (
@@ -468,17 +483,19 @@ has_field medical_attention => (
 );
 
 has_field attention_date => (
-    required => 1,
+    required => 0,
     type => 'Text', # DateTime',
     hint => 'For example 11 08 2020',
     label => 'Date you received medical attention',
+    required_when => { 'medical_attention' => 1 },
 );
 
 has_field gp_contact => (
-    required => 1,
+    required => 0,
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give the name and contact details of the GP or hospital where you recieved medical attention',
+    required_when => { 'medical_attention' => 1 },
 );
 
 has_field absent_work => (
@@ -493,10 +510,11 @@ has_field absent_work => (
 );
 
 has_field absence_dates => (
-    required => 1,
+    required => 0,
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give dates of absences',
+    required_when => { 'absent_work' => 1 },
 );
 
 has_field ongoing_treatment => (
@@ -511,10 +529,11 @@ has_field ongoing_treatment => (
 );
 
 has_field treatment_details => (
-    required => 1,
+    required => 0,
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give treatment details',
+    required_when => { 'ongoing_treatment' => 1 },
 );
 
 
