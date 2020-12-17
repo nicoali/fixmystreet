@@ -10,6 +10,8 @@
 [% BLOCK format_value -%]
     [% IF field.block == 'yes_no' %]
         [% field.value == 1 ? 'Yes' : 'No' %]
+    [% ELSIF field.block == 'date' %]
+        [% field.value.day %]/[% field.value.month %]/[% field.value.year %]
     [% END %]
 [%- END %]
 
@@ -80,11 +82,12 @@
             fields => [
                 {
                     desc => "Date",
-                    value => data.date
+                    block => 'date',
+                    value => data.incident_date
                 },
                 {
                     desc => "Time",
-                    value => data.time
+                    value => data.incident_time
                 },
             ]
         },

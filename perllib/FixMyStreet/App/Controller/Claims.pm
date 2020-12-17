@@ -153,11 +153,11 @@ sub fields : Private {
             fields => [
                 {
                     desc => "Date",
-                    value => 'date'
+                    value => 'incident_date'
                 },
                 {
                     desc => "Time",
-                    value => 'time'
+                    value => 'incident_time'
                 },
             ]
         },
