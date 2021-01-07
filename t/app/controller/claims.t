@@ -38,6 +38,46 @@ FixMyStreet::override_config {
         #is $report->detail, "Kind of noise: music\nNoise details: Details\n\nWhere is the noise coming from? residence\nNoise source: 100000333\n\nIs the noise happening now? Yes\nDoes the time of the noise follow a pattern? Yes\nWhat days does the noise happen? monday, thursday\nWhat time does the noise happen? morning, evening\n";
         #is $report->latitude, 53;
     };
+
+    subtest 'Report new property claim, report id known' => sub {
+        $mech->get_ok('/claims');
+        $mech->submit_form_ok({ button => 'start' });
+        $mech->submit_form_ok({ with_fields => { what => 2, claimed_before => 0 } });
+        $mech->submit_form_ok({ with_fields => { name => "Test McTest", email => 'test@example.org', phone => '01234 567890', address => "12 A Street\nA Town" } });
+        $mech->submit_form_ok({ with_fields => { fault_fixed => 2 } });
+        $mech->submit_form_ok({ with_fields => { fault_reported => 1 } });
+        $mech->submit_form_ok({ with_fields => { report_id => 1 } });
+        $mech->submit_form_ok({ with_fields => { location => 'A location' } });
+        $mech->submit_form_ok({ with_fields => { 'incident_date.year' => 2020, 'incident_date.month' => 10, 'incident_date.day' => 10, incident_time => 'morning' } });
+        $mech->submit_form_ok({ with_fields => { weather => 'sunny', direction => 'east', details => 'some details' } });
+        $mech->submit_form_ok({ with_fields => { witnesses => 1, witness_details => 'some witnesses', report_police => 1, incident_number => 23 } });
+        $mech->submit_form_ok({ with_fields => { what_cause => 'bollard', aware => 1, where_cause => 'bridge', describe_cause => 'a cause', photos => 'phoot!' } });
+        $mech->submit_form_ok({ with_fields => { property_insurance => 'property_insurance' } });
+        $mech->submit_form_ok({ with_fields => { property_damage_description => 'damage_description', property_photos => 'property photos', property_invoices => 'property invoices' } });
+        $mech->content_contains('Review');
+        $mech->submit_form_ok({ with_fields => { process => 'summary' } });
+        $mech->content_contains('Claim submitted');
+    };
+
+    subtest 'Report new injury claim, report id known' => sub {
+        $mech->get_ok('/claims');
+        $mech->submit_form_ok({ button => 'start' });
+        $mech->submit_form_ok({ with_fields => { what => 1, claimed_before => 0 } });
+        $mech->submit_form_ok({ with_fields => { name => "Test McTest", email => 'test@example.org', phone => '01234 567890', address => "12 A Street\nA Town" } });
+        $mech->submit_form_ok({ with_fields => { fault_fixed => 2 } });
+        $mech->submit_form_ok({ with_fields => { fault_reported => 1 } });
+        $mech->submit_form_ok({ with_fields => { report_id => 1 } });
+        $mech->submit_form_ok({ with_fields => { location => 'A location' } });
+        $mech->submit_form_ok({ with_fields => { 'incident_date.year' => 2020, 'incident_date.month' => 10, 'incident_date.day' => 10, incident_time => 'morning' } });
+        $mech->submit_form_ok({ with_fields => { weather => 'sunny', direction => 'east', details => 'some details' } });
+        $mech->submit_form_ok({ with_fields => { witnesses => 1, witness_details => 'some witnesses', report_police => 1, incident_number => 23 } });
+        $mech->submit_form_ok({ with_fields => { what_cause => 'bollard', aware => 1, where_cause => 'bridge', describe_cause => 'a cause', photos => 'phoot!' } });
+        $mech->submit_form_ok({ with_fields => { 'dob.year' => 1980, 'dob.month' => 5, 'dob.day' => 10, ni_number => 'ni number', occupation => 'occupation', 'employer_contact' => 'employer contact' } });
+        $mech->submit_form_ok({ with_fields => { describe_injuries => 'describe injuries', medical_attention => 1, 'attention_date.year' => 2020, 'attention_date.month' => 9, 'attention_date.day' => 23, gp_contact => 'GP contact', absent_work => 1, absence_dates => 'absence dates', ongoing_treatment => 1, treatment_details => 'treatment details' } });
+        $mech->content_contains('Review');
+        $mech->submit_form_ok({ with_fields => { process => 'summary' } });
+        $mech->content_contains('Claim submitted');
+    };
 };
 
 done_testing;
