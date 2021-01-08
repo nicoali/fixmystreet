@@ -113,7 +113,6 @@ has_field fault_reported => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    #label => 'All claims require that you have logged a fault with the Council. If you haven\'t done so you should make one now.',
     label => 'Have you reported the fault to the Council?',
     options => [
         { label => 'Yes', value => '1' },
@@ -145,7 +144,7 @@ has_field location => (
     required => 1,
     type => 'Text',
     widget => 'Textarea',
-    label => 'Location',
+    label => 'Place a pin on the map (TBD)',
 );
 
 has_page when => (
@@ -194,7 +193,7 @@ has_field weather => (
 has_field direction => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
-    label => 'What direction were you travelling in at the time',
+    label => 'What direction were you travelling in at the time?',
 );
 
 has_field details => (
@@ -255,7 +254,7 @@ has_field report_police => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    label => 'Did you report the incident to the police',
+    label => 'Did you report the incident to the police?',
     options => [
         { label => 'Yes', value => '1' },
         { label => 'No', value => '0' },
@@ -282,7 +281,7 @@ has_field what_cause => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    label => 'What was the cause of the incident',
+    label => 'What was the cause of the incident?',
     options => [
         { label => 'Bollard', value => 'bollard' },
         { label => 'Cats Eyes', value => 'catseyes' },
@@ -305,7 +304,7 @@ has_field where_cause => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    label => 'Where was the cause of the incident',
+    label => 'Where was the cause of the incident?',
     options => [
         { label => 'Bridge', value => 'bridge' },
         { label => 'Carriageway', value => 'carriageway' },
@@ -351,14 +350,14 @@ has_field mileage => (
 has_field v5 => (
     required => 1,
     type => 'Text',
-    label => 'V5',
+    label => 'Copy of the vehicles V5 Registration Document',
 );
 
 has_field v5_in_name => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    label => 'Is the V5 in your name',
+    label => 'Is the V5 document in your name?',
     options => [
         { label => 'Yes', value => '1' },
         { label => 'No', value => '0' },
@@ -368,14 +367,14 @@ has_field v5_in_name => (
 has_field insurer_address => (
     type => 'Text',
     widget => 'Textarea',
-    label => 'Insurer address',
+    label => 'Name and address of the Vehicle\'s Insurer',
 );
 
 has_field damage_claim => (
     type => 'Select',
     widget => 'RadioGroup',
     required => 1,
-    label => 'Are you making a claim via insurers',
+    label => 'Are you making a claim via the insurance company?',
     options => [
         { label => 'Yes', value => '1' },
         { label => 'No', value => '0' },
@@ -416,6 +415,7 @@ has_field vehicle_receipts=> (
     required => 1,
     type => 'Text',
     label => 'Please provide receipted invoiced for repairs',
+    hint => 'Or estimates where the damage has not yet been repaired',
 );
 
 has_field tyre_damage => (
@@ -431,7 +431,7 @@ has_field tyre_damage => (
 
 has_field tyre_mileage => (
     type => 'Text',
-    label => 'Tyre Mileage',
+    label => 'Age and Mileage of the tyre(s) at the time of the incident',
     required_when => { 'tyre_damage' => 1 },
 );
 
@@ -460,7 +460,7 @@ has_field property_insurance => (
 
 has_page damage_property => (
     fields => ['property_damage_description', 'property_photos', 'property_invoices', 'continue'],
-    title => 'What was the damage to the property',
+    title => 'What was the damage to the property?',
     next => 'summary',
 );
 
