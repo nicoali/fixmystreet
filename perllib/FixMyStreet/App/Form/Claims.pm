@@ -415,9 +415,27 @@ has_field vat_reg => (
 );
 
 has_page damage_vehicle => (
-    fields => ['vehicle_damage', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
+    fields => ['vehicle_damage', 'vehicle_upload_fileid', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
     title => 'What was the damage to the vehicle',
     next => 'summary',
+    update_field_list => sub {
+        my ($form) = @_;
+        my $saved_data = $form->saved_data;
+        if ($saved_data->{vehicle_photos}) {
+            $saved_data->{vehicle_upload_fileid} = $saved_data->{vehicle_photos};
+            return { vehicle_upload_fileid => { default => $saved_data->{vehicle_photos} } };
+        }
+        return {};
+    },
+    post_process => sub {
+        my ($form) = @_;
+        my $c = $form->{c};
+
+        my $saved_data = $form->saved_data;
+        $saved_data->{vehicle_photos} = $saved_data->{vehicle_upload_fileid};
+        $saved_data->{upload_fileid} = '';
+
+    },
 );
 
 has_field vehicle_damage => (
@@ -427,9 +445,20 @@ has_field vehicle_damage => (
     label => 'Describe the damage to the vehicle',
 );
 
-has_field vehicle_photos => (
+has_field vehicle_upload_fileid => (
     required => 1,
-    type => 'Text',
+    type => 'Hidden',
+    validate_method => sub {
+        my $self = shift;
+        my $value = $self->value;
+        my @parts = split(/,/, $value);
+        return scalar @parts == 2;
+    }
+);
+
+has_field vehicle_photos => (
+    type => 'Photo',
+    tags => { upload_field => 'vehicle_upload_fileid' },
     label => 'Please provide two photos of the damage to the vehicle',
 );
 

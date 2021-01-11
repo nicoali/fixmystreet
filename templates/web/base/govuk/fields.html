@@ -278,7 +278,7 @@
       <img align="left" src="/photo/temp.[% field.fif %]" alt="">
   [% END %]
 
-  <div id="form_photos">
-  <input class="govuk-file-upload js-photo-fields" id="[% field.id %]" name="[% field.id %]" type="file">
+  <div>
+  <input class="govuk-file-upload js-photo-fields" id="[% field.id %]" name="[% field.id %]" type="file" data-upload-field="[% field.get_tag('upload_field') || 'upload_fileid' %]">
   </div>
 [% END %]
