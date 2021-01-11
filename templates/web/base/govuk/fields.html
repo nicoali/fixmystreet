@@ -21,6 +21,8 @@
         [% PROCESS checkboxes options=[{ value = 1, label = field.option_label }] %]
     [% ELSIF field.type == 'DateTime' # Date %]
         [% PROCESS date %]
+    [% ELSIF field.type == 'Photo' # Date %]
+        [% PROCESS photo %]
     [% ELSE %]
         [% field.html_name %] [% field.widget %] NOT HANDLED
     [% END %]
@@ -256,4 +258,27 @@
       <option value="[% item.value %]"[% ' selected' IF field.fif == item.value %]>[% item.label %]</option>
 	[% END %]
   </select>
+[% END %]
+
+[% BLOCK photo %]
+    <label class="govuk-label js-photo-label" for="[% field.id %]">
+        [% field.label %]
+    </label>
+  [% IF field.get_tag('hint') %]
+    <span id="[% field.id %]-hint" class="govuk-hint">
+        [% field.get_tag('hint') %]
+    </span>
+  [% END %]
+  [% IF error %]
+    <span id="[% field.id %]-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span> [% error %]
+    </span>
+  [% END %]
+  [% IF field.fif %]
+      <img align="left" src="/photo/temp.[% field.fif %]" alt="">
+  [% END %]
+
+  <div id="form_photos">
+  <input class="govuk-file-upload js-photo-fields" id="[% field.id %]" name="[% field.id %]" type="file">
+  </div>
 [% END %]

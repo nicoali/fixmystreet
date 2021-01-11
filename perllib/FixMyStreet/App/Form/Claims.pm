@@ -268,13 +268,35 @@ has_field incident_number => (
 
 
 has_page cause => (
-    fields => ['what_cause', 'aware', 'where_cause', 'describe_cause', 'photos', 'continue'],
+    fields => ['what_cause', 'aware', 'where_cause', 'describe_cause', 'upload_fileid', 'photos', 'continue'],
     title => 'What caused the incident?',
     next => sub {
             $_[0]->{what} == 0 ? 'about_vehicle' :
             $_[0]->{what} == 1 ? 'about_you_personal' :
             'about_property',
         },
+    update_field_list => sub {
+        my ($form) = @_;
+        my $saved_data = $form->saved_data;
+        if ($saved_data->{photos}) {
+            $saved_data->{upload_fileid} = $saved_data->{photos};
+            return { upload_fileid => { default => $saved_data->{photos} } };
+        }
+        return {};
+    },
+    post_process => sub {
+            my ($form) = @_;
+            my $c = $form->{c};
+            #$c->forward('/photo/process_photo');
+
+            my $saved_data = $form->saved_data;
+            $saved_data->{photos} = $saved_data->{upload_fileid};
+            $saved_data->{upload_fileid} = '';
+        },
+);
+
+has_field upload_fileid => (
+    type => 'Hidden'
 );
 
 has_field what_cause => (
@@ -319,7 +341,7 @@ has_field describe_cause => (
 );
 
 has_field photos => (
-    type => 'Text',
+    type => 'Photo',
     label => 'Please provide two dated photos of the incident',
 );
 
