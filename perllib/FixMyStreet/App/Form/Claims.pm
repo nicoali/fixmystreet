@@ -433,30 +433,8 @@ has_page damage_vehicle => (
             $fields = { vehicle_upload_fileid => { default => $saved_data->{vehicle_photos} } };
         }
 
-        my $cfg = FixMyStreet->config('PHOTO_STORAGE_OPTIONS');
-        my $dir = $cfg ? $cfg->{UPLOAD_DIR} : FixMyStreet->config('UPLOAD_DIR');
-        $dir = path($dir, "claims_files")->absolute(FixMyStreet->path_to());
-        $dir->mkpath;
-
-        my $receipts = $c->req->upload('vehicle_receipts');
-        if ( $receipts ) {
-            FixMyStreet::PhotoStorage::base64_decode_upload($c, $receipts);
-            my ($p, $n, $ext) = fileparse($receipts->filename, qr/\.[^.]*/);
-            my $key = sha1_hex($receipts->slurp) . $ext;
-            my $out = path($dir, $key);
-            unless (copy($receipts->tempname, $out)) {
-                $c->log->info('Couldn\'t copy temp file to destination: ' . $!);
-                $c->stash->{photo_error} = _("Sorry, we couldn't save your file(s), please try again.");
-                return;
-            }
-            # Then store the file hashes in report->extra along with the original filenames
-            $form->saved_data->{vehicle_receipts} =  $key;
-            $fields->{vehicle_receipts} = { default => $key, tags => { files => $key, filenames => [ $receipts->raw_basename ] } };
-            $form->params->{vehicle_receipts_fileid} = '';
-        } elsif ( $saved_data->{vehicle_receipts} ) {
-            my $file = $saved_data->{vehicle_receipts};
-            $fields->{vehicle_receipts} = { default => $file, tags => { files => $file, filenames => [ $file] } };
-        }
+        $form->handle_upload( 'vehicle_receipts', $fields );
+        $form->handle_upload( 'tyre_receipts', $fields );
 
         return $fields;
     },
@@ -469,7 +447,10 @@ has_page damage_vehicle => (
         $saved_data->{upload_fileid} = '';
 
         if ( $form->params->{vehicle_receipts_fileid} ) {
-            $saved_data->{vehicle_receipts} = $form->params->{upload_fileid};
+            $saved_data->{vehicle_receipts} = $form->params->{vehicle_receipts_fileid};
+        }
+        if ( $form->params->{tyre_receipts_fileid} ) {
+            $saved_data->{tyre_receipts} = $form->params->{tyre_receipts_fileid};
         }
 
     },
@@ -500,7 +481,6 @@ has_field vehicle_photos => (
 );
 
 has_field vehicle_receipts=> (
-    #required => 1,
     type => 'Upload',
     label => 'Please provide receipted invoiced for repairs',
     hint => 'Or estimates where the damage has not yet been repaired',
@@ -529,9 +509,13 @@ has_field tyre_mileage => (
 );
 
 has_field tyre_receipts => (
-    type => 'Text',
+    type => 'Upload',
     label => 'Please provide copy of tyre purchase receipts',
-    required_when => { 'tyre_damage' => 1 },
+    validate_method => sub {
+        my $self = shift;
+        my $c = $self->form->{c};
+        return 1 if $self->form->saved_data->{tyre_damage} == 1 && $c->req->upload('tyre_receipts');
+    }
 );
 
 has_page about_property => (
@@ -542,14 +526,32 @@ has_page about_property => (
 
 has_field property_insurance => (
     required => 1,
-    type => 'Text',
+    type => 'Upload',
     label => 'Please provide a copy of the home/contents insurance certificate',
 );
 
 has_page damage_property => (
-    fields => ['property_damage_description', 'property_photos', 'property_invoices', 'continue'],
+    fields => ['property_damage_description', 'upload_fileid', 'upload_fileid', 'property_photos', 'property_invoices', 'continue'],
     title => 'What was the damage to the property?',
     next => 'summary',
+    update_field_list => sub {
+        my ($form) = @_;
+        my $saved_data = $form->saved_data;
+        if ($saved_data->{property_photos}) {
+            $saved_data->{upload_fileid} = $saved_data->{property_photos};
+            return { upload_fileid => { default => $saved_data->{property_photos} } };
+        }
+        return {};
+    },
+    post_process => sub {
+            my ($form) = @_;
+            my $c = $form->{c};
+            #$c->forward('/photo/process_photo');
+
+            my $saved_data = $form->saved_data;
+            $saved_data->{property_photos} = $saved_data->{upload_fileid};
+            $saved_data->{upload_fileid} = '';
+        },
 );
 
 has_field property_damage_description => (
@@ -719,5 +721,37 @@ has_page done => (
 has_field start => ( type => 'Submit', value => 'Start', element_attr => { class => 'govuk-button' } );
 has_field continue => ( type => 'Submit', value => 'Continue', element_attr => { class => 'govuk-button' } );
 has_field submit => ( type => 'Submit', value => 'Submit', element_attr => { class => 'govuk-button' } );
+
+sub handle_upload {
+    my ($form, $fieldname, $fields) = @_;
+
+    my $c = $form->{c};
+    my $saved_data = $form->saved_data;
+
+    my $cfg = FixMyStreet->config('PHOTO_STORAGE_OPTIONS');
+    my $dir = $cfg ? $cfg->{UPLOAD_DIR} : FixMyStreet->config('UPLOAD_DIR');
+    $dir = path($dir, "claims_files")->absolute(FixMyStreet->path_to());
+    $dir->mkpath;
+
+    my $receipts = $c->req->upload($fieldname);
+    if ( $receipts ) {
+        FixMyStreet::PhotoStorage::base64_decode_upload($c, $receipts);
+        my ($p, $n, $ext) = fileparse($receipts->filename, qr/\.[^.]*/);
+        my $key = sha1_hex($receipts->slurp) . $ext;
+        my $out = path($dir, $key);
+        unless (copy($receipts->tempname, $out)) {
+            $c->log->info('Couldn\'t copy temp file to destination: ' . $!);
+            $c->stash->{photo_error} = _("Sorry, we couldn't save your file(s), please try again.");
+            return;
+        }
+        # Then store the file hashes in report->extra along with the original filenames
+        $form->saved_data->{$fieldname} =  $key;
+        $fields->{$fieldname} = { default => $key, tags => { files => $key, filenames => [ $receipts->raw_basename ] } };
+        $form->params->{$fieldname . '_fileid'} = '';
+    } elsif ( $saved_data->{$fieldname} ) {
+        my $file = $saved_data->{$fieldname};
+        $fields->{$fieldname} = { default => $file, tags => { files => $file, filenames => [ $file] } };
+    }
+}
 
 1;
