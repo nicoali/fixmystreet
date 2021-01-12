@@ -3,6 +3,11 @@ package FixMyStreet::App::Form::Claims;
 use HTML::FormHandler::Moose;
 extends 'FixMyStreet::App::Form::Wizard';
 
+use Path::Tiny;
+use File::Copy;
+use Digest::SHA qw(sha1_hex);
+use File::Basename;
+
 has c => ( is => 'ro' );
 
 has default_page_type => ( is => 'ro', isa => 'Str', default => 'Claims' );
@@ -420,12 +425,40 @@ has_page damage_vehicle => (
     next => 'summary',
     update_field_list => sub {
         my ($form) = @_;
+        my $fields = {};
+        my $c = $form->{c};
         my $saved_data = $form->saved_data;
         if ($saved_data->{vehicle_photos}) {
             $saved_data->{vehicle_upload_fileid} = $saved_data->{vehicle_photos};
-            return { vehicle_upload_fileid => { default => $saved_data->{vehicle_photos} } };
+            $fields = { vehicle_upload_fileid => { default => $saved_data->{vehicle_photos} } };
         }
-        return {};
+
+        my $cfg = FixMyStreet->config('PHOTO_STORAGE_OPTIONS');
+        my $dir = $cfg ? $cfg->{UPLOAD_DIR} : FixMyStreet->config('UPLOAD_DIR');
+        $dir = path($dir, "claims_files")->absolute(FixMyStreet->path_to());
+        $dir->mkpath;
+
+        my $receipts = $c->req->upload('vehicle_receipts');
+        if ( $receipts ) {
+            FixMyStreet::PhotoStorage::base64_decode_upload($c, $receipts);
+            my ($p, $n, $ext) = fileparse($receipts->filename, qr/\.[^.]*/);
+            my $key = sha1_hex($receipts->slurp) . $ext;
+            my $out = path($dir, $key);
+            unless (copy($receipts->tempname, $out)) {
+                $c->log->info('Couldn\'t copy temp file to destination: ' . $!);
+                $c->stash->{photo_error} = _("Sorry, we couldn't save your file(s), please try again.");
+                return;
+            }
+            # Then store the file hashes in report->extra along with the original filenames
+            $form->saved_data->{vehicle_receipts} =  $key;
+            $fields->{vehicle_receipts} = { default => $key, tags => { files => $key, filenames => [ $receipts->raw_basename ] } };
+            $form->params->{vehicle_receipts_fileid} = '';
+        } elsif ( $saved_data->{vehicle_receipts} ) {
+            my $file = $saved_data->{vehicle_receipts};
+            $fields->{vehicle_receipts} = { default => $file, tags => { files => $file, filenames => [ $file] } };
+        }
+
+        return $fields;
     },
     post_process => sub {
         my ($form) = @_;
@@ -434,6 +467,10 @@ has_page damage_vehicle => (
         my $saved_data = $form->saved_data;
         $saved_data->{vehicle_photos} = $saved_data->{vehicle_upload_fileid};
         $saved_data->{upload_fileid} = '';
+
+        if ( $form->params->{vehicle_receipts_fileid} ) {
+            $saved_data->{vehicle_receipts} = $form->params->{upload_fileid};
+        }
 
     },
 );
@@ -463,10 +500,15 @@ has_field vehicle_photos => (
 );
 
 has_field vehicle_receipts=> (
-    required => 1,
-    type => 'Text',
+    #required => 1,
+    type => 'Upload',
     label => 'Please provide receipted invoiced for repairs',
     hint => 'Or estimates where the damage has not yet been repaired',
+    validate_method => sub {
+        my $self = shift;
+        my $c = $self->form->{c};
+        return 1 if $c->req->upload('vehicle_receipts');
+    }
 );
 
 has_field tyre_damage => (
@@ -490,11 +532,6 @@ has_field tyre_receipts => (
     type => 'Text',
     label => 'Please provide copy of tyre purchase receipts',
     required_when => { 'tyre_damage' => 1 },
-);
-
-has_field tyre_receipts => (
-    type => 'Text',
-    label => 'Please provide copy of tyre purchase receipts',
 );
 
 has_page about_property => (
