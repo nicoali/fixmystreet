@@ -208,6 +208,19 @@ sub look_up_property {
     return $premises{$uprn};
 }
 
+sub image_for_service {
+    my ($self, $service_id) = @_;
+    $self->{c}->log->debug("XXXX $service_id");
+    my $base = '/cobrands/bromley/images/container-images';
+    my $images = {
+        6533 => "$base/refuse-black-sack",
+        6534 => "$base/small-communal-mix",
+        6579 => "$base/food-communal",
+    };
+    return $images->{$service_id};
+}
+
+
 sub bin_services_for_address {
     my $self = shift;
     my $property = shift;
@@ -231,6 +244,7 @@ sub bin_services_for_address {
             next => { date => $next, ordinal => ordinal($next->day) },
             service_name => $_->{JobDescription},
             schedule => $schedules{$_->{JobName}}->{Frequency},
+            service_id => $schedules{$_->{JobName}}->{Feature}->{FeatureType}->{ID},
         };
         push @out, $row;
     }
