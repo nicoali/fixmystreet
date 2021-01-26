@@ -168,13 +168,21 @@
       [% IF loop.last AND field.get_tag('last_differs') %]
         <div class="govuk-radios__divider">or</div>
       [% END %]
+	  [% hint = item.hint OR item.get_tag('hint') ~%]
       <div class="govuk-radios__item">
         <input type="radio" class="govuk-radios__input" id="[% field.id %]-[% loop.index %]"
-            name="[% field.html_name %]" value="[% item.value %]"
+            name="[% field.html_name %]" value="[% item.value %]"[% ' aria-describedby="' _ field.id _ '-item-hint"' IF hint %]
+            [% 'data-show="' _ item.data_show _ '"' IF item.data_show %]
+            [% 'data-hide="' _ item.data_hide _ '"' IF item.data_hide %]
             [% 'checked' IF field.fif == item.value %]>
         <label class="govuk-label govuk-radios__label" for="[% field.id %]-[% loop.index %]">
           [% item.label %]
         </label>
+[% IF hint %]
+        <span id="[% field.id %]-item-hint" class="govuk-hint govuk-checkboxes__hint">
+          [% hint %]
+        </span>
+[% END %]
       </div>
     [% END %]
     </div>
@@ -202,6 +210,7 @@
     <input class="govuk-input[% IF error %] govuk-input--error[% END %]" id="[% field.id %]" name="[% field.html_name %]" type="text"
          value="[% field.fif %]"
     [%~ IF field.get_tag('autofocus') %] autofocus[% END ~%]
+    [%~ IF field.disabled %] disabled[% END ~%]
     [%~ IF field.get_tag('hint') OR error %]
       aria-describedby="[% IF field.get_tag('hint') %][% field.id %]-hint [% END %][% IF error %][% id %]-error[% END %]"
     [%~ END %]>
