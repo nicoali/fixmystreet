@@ -267,7 +267,7 @@ sub bin_services_for_address {
 
     my %container_request_max = (
         6533 => 1, # 240L Black
-        6534 => 1, # 240L Green
+        6534 => 2, # 240L Green (max 2 per household, need to check how many property already has dynamically)
         6579 => 1, # 240L Brown
         6836 => undef, # Refuse 1100l
         6837 => undef, # Refuse 660l
@@ -310,6 +310,25 @@ sub bin_services_for_address {
     }
 
     return \@out;
+}
+
+sub bin_request_form_extra_fields {
+    my ($self, $service, $container_id, $field_list) = @_;
+
+    if ($container_id == 419) { # Request New Black 240L
+        # Add a new "reason" field
+        push @$field_list, "reason-$container_id" => {
+            type => 'Text',
+            label => 'Why do you need new bins?',
+            tags => {
+                initial_hidden => 1,
+            },
+            required_when => { "container-$container_id" => 1 },
+        };
+        # And make sure it's revealed when the box is ticked
+        my %fields = @$field_list;
+        $fields{"container-$container_id"}{tags}{toggle} .= ", #form-reason-$container_id-row";
+    }
 }
 
 sub _format_address {
