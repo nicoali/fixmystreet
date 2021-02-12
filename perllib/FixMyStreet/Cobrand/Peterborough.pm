@@ -240,9 +240,14 @@ sub bin_services_for_address {
         "Empty Bin Refuse 660l" => "Refuse",
     );
 
+    $self->{c}->stash->{containers} = {
+        419 => "240L Black",
+        420 => "240L Green",
+    };
+
     my %container_request_ids = (
-        6533 => 419, # 240L Black
-        6534 => 420, # 240L Green
+        6533 => [ 419 ], # 240L Black
+        6534 => [ 420 ], # 240L Green
         6579 => undef, # 240L Brown
         6836 => undef, # Refuse 1100l
         6837 => undef, # Refuse 660l
@@ -256,9 +261,9 @@ sub bin_services_for_address {
     );
 
     my %container_removal_ids = (
-        6533 => 487, # 240L Black
-        6534 => 488, # 240L Green
-        6579 => 489, # 240L Brown
+        6533 => [ 487 ], # 240L Black
+        6534 => [ 488 ], # 240L Green
+        6579 => [ 489 ], # 240L Brown
         6836 => undef, # Refuse 1100l
         6837 => undef, # Refuse 660l
         6839 => undef, # Refuse 240l
@@ -305,7 +310,7 @@ sub bin_services_for_address {
             service_name => $service_name_override{$_->{JobDescription}} || $_->{JobDescription},
             schedule => $schedules{$_->{JobName}}->{Frequency},
             service_id => $container_id,
-            request_containers => [ $container_request_ids{$container_id} ],
+            request_containers => $container_request_ids{$container_id},
             request_allowed => $container_request_ids{$container_id} ? 1 : 0,
             request_max => $container_request_max{$container_id} || 0,
         };
@@ -333,6 +338,21 @@ sub bin_request_form_extra_fields {
         $fields{"container-$container_id"}{tags}{toggle} .= ", #form-reason-$container_id-row";
     }
 }
+
+sub waste_munge_request_data {
+    my ($self, $id, $data) = @_;
+
+    my $c = $self->{c};
+
+    my $address = $c->stash->{property}->{address};
+    my $container = $c->stash->{containers}{$id};
+    my $quantity = $data->{"quantity-$id"};
+    $data->{title} = "Request new $container";
+    $data->{detail} = "Quantity: $quantity\n\n$address";
+    $data->{category} = "Black 240L bin";
+    $c->set_param(category => "Black 240L bin");
+}
+
 
 sub _format_address {
     my ($self, $property) = @_;
