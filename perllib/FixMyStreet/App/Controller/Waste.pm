@@ -456,8 +456,6 @@ sub setup_categories_and_bodies : Private {
 
     $c->stash->{all_areas} = $c->stash->{all_areas_mapit} = { $c->cobrand->council_area_id => { id => $c->cobrand->council_area_id } };
     $c->forward('/report/new/setup_categories_and_bodies');
-    my $contacts = $c->stash->{contacts};
-    @$contacts = grep { grep { $_ eq 'Waste' } @{$_->groups} } @$contacts;
 }
 
 sub receive_echo_event_notification : Path('/waste/echo') : Args(0) {

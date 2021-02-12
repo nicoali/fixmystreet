@@ -151,7 +151,10 @@ sub munge_reports_category_list {
 sub munge_report_new_contacts {
     my ($self, $categories) = @_;
 
-    return if $self->{c}->action =~ /^waste/;
+    if ($self->{c}->action =~ /^waste/) {
+        @$categories = grep { $_->get_extra_metadata('waste_only') } @$categories;
+        return;
+    }
 
     @$categories = grep { !$_->get_extra_metadata('waste_only') } @$categories;
     $self->SUPER::munge_report_new_contacts($categories);
