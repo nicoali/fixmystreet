@@ -349,8 +349,7 @@ sub waste_munge_request_data {
     my $quantity = $data->{"quantity-$id"};
     $data->{title} = "Request new $container";
     $data->{detail} = "Quantity: $quantity\n\n$address";
-    $data->{category} = "Black 240L bin";
-    $c->set_param(category => "Black 240L bin");
+    $data->{category} = $self->body->contacts->find({ email => "Bartec-$id" })->category;
 }
 
 
