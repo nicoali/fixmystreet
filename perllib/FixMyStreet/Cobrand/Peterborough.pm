@@ -172,16 +172,24 @@ sub _premises_for_postcode {
         my $response = $bartec->Premises_Get($pc);
 
         $self->{c}->session->{$key} = [ map { {
-            id =>$pc . ":" . $_->{UPRN},
+            id => $pc . ":" . $_->{UPRN},
             uprn => $_->{UPRN},
             address => $self->_format_address($_),
             latitude => $_->{Location}->{Metric}->{Latitude},
             longitude => $_->{Location}->{Metric}->{Longitude},
         } } @$response ];
-        # XXX Need to remove this from session at end of interaction
     }
 
     return $self->{c}->session->{$key};
+}
+
+sub _clear_premises_for_postcode_cache {
+    my $self = shift;
+    my $pc = shift;
+
+    my $key = "peterborough:bartec:premises_for_postcode:$pc";
+
+    delete $self->{c}->session->{$key};
 }
 
 
@@ -213,7 +221,6 @@ sub look_up_property {
 
 sub image_for_service {
     my ($self, $service_id) = @_;
-    $self->{c}->log->debug("XXXX $service_id");
     my $base = '/cobrands/peterborough/images';
     my $images = {
         6533 => "$base/black-bin",
@@ -354,6 +361,9 @@ sub waste_munge_request_data {
     }
 
     $data->{category} = $self->body->contacts->find({ email => "Bartec-$id" })->category;
+
+    my ($pc, $uprn) = split ":", $c->stash->{property}->{id};
+    $self->_clear_premises_for_postcode_cache($pc);
 }
 
 
