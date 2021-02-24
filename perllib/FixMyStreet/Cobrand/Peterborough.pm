@@ -360,6 +360,22 @@ sub bin_services_for_address {
     return \@out;
 }
 
+sub bin_future_collections {
+    my $self = shift;
+
+    my $bartec = $self->feature('bartec');
+    $bartec = Integrations::Bartec->new(%$bartec);
+
+    my $jobs = $bartec->Jobs_FeatureScheduleDates_Get($self->{c}->stash->{property}{uprn});
+
+    my $events = [];
+    foreach (@$jobs) {
+        my $dt = construct_bin_date($_->{NextDate});
+        push @$events, { date => $dt, desc => '', summary => $_->{JobName} };
+    }
+    return $events;
+}
+
 sub bin_request_form_extra_fields {
     my ($self, $service, $container_id, $field_list) = @_;
 
