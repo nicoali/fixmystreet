@@ -323,8 +323,15 @@ sub bin_services_for_address {
             schedule => $schedules{$_->{JobName}}->{Frequency},
             service_id => $container_id,
             request_containers => $container_request_ids{$container_id},
+
+            # can this container type be requested?
             request_allowed => $container_request_ids{$container_id} ? 1 : 0,
+            # what's the maximum number of this container that can be request?
             request_max => $container_request_max{$container_id} || 0,
+            # can this collection be reported as having been missed?
+            report_allowed => 1,
+            # is there already a missed collection report open for this container?
+            report_open => 0,
         };
         push @out, $row;
     }
