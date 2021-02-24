@@ -183,10 +183,10 @@ sub _premises_for_postcode {
     return $self->{c}->session->{$key};
 }
 
-sub _clear_premises_for_postcode_cache {
+sub _clear_cached_postcode_lookup {
     my $self = shift;
-    my $pc = shift;
 
+    my ($pc, $uprn) = split ":", $self->{c}->stash->{property}->{id};
     my $key = "peterborough:bartec:premises_for_postcode:$pc";
 
     delete $self->{c}->session->{$key};
@@ -395,8 +395,42 @@ sub waste_munge_request_data {
 
     $data->{category} = $self->body->contacts->find({ email => "Bartec-$id" })->category;
 
-    my ($pc, $uprn) = split ":", $c->stash->{property}->{id};
-    $self->_clear_premises_for_postcode_cache($pc);
+    $self->_clear_cached_postcode_lookup;
+}
+
+sub waste_munge_report_data {
+    my ($self, $id, $data) = @_;
+
+
+    use Data::Dumper;
+    warn "XXX $id";
+    warn Dumper($data);
+
+    my %container_service_ids = (
+        6533 => 255, # 240L Black
+        6534 => 254, # 240L Green
+        6579 => 253, # 240L Brown
+        6836 => undef, # Refuse 1100l
+        6837 => undef, # Refuse 660l
+        6839 => undef, # Refuse 240l
+        6840 => undef, # Recycling 1100l
+        6841 => undef, # Recycling 660l
+        6843 => undef, # Recycling 240l
+        # black 360L?
+    );
+
+
+    my $c = $self->{c};
+
+    my $address = $c->stash->{property}->{address};
+    my $service_id = $container_service_ids{$id};
+    my $container = $c->stash->{containers}{$id};
+    $data->{title} = "Report missed $container";
+    $data->{detail} = "$data->{title}\n\n$address";
+
+    $data->{category} = $self->body->contacts->find({ email => "Bartec-$service_id" })->category;
+
+    $self->_clear_cached_postcode_lookup;
 }
 
 
