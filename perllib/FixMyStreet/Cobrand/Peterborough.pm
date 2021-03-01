@@ -347,6 +347,7 @@ sub bin_services_for_address {
         request_allowed => 1,
         request_max => 1,
         request_only => 1,
+        report_only => 1,
     };
     push @out, {
         id => "_ALL_BINS",
