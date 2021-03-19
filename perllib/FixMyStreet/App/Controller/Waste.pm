@@ -155,11 +155,15 @@ sub construct_bin_request_form {
                 tags => { toggle => "form-quantity-$id-row" },
             };
             $name = ''; # Only on first container
+            my $hint = sprintf(mySociety::Locale::nget(
+                    "You can request a maximum of %s container",
+                    "You can request a maximum of %s containers",
+                    $max), NUMWORDS($max));
             push @$field_list, "quantity-$id" => {
                 type => 'Select',
                 label => 'Quantity',
                 tags => {
-                    hint => "You can request a maximum of " . NUMWORDS($max) . " containers",
+                    hint => $hint,
                     initial_hidden => 1,
                 },
                 options => [
