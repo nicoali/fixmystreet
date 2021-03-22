@@ -68,6 +68,14 @@ sub redirect_to_id : Private {
     $c->detach;
 }
 
+
+sub direct_debit_complete : Path('dd_complete') : Args(0) {
+    my ($self, $c) = @_;
+
+    $c->res->body('NOT IMPLEMENTED');
+
+}
+
 sub property : Chained('/') : PathPart('waste') : CaptureArgs(1) {
     my ($self, $c, $id) = @_;
 
@@ -136,7 +144,8 @@ sub construct_bin_request_form {
     my $field_list = [];
 
     foreach (@{$c->stash->{service_data}}) {
-        next unless $_->{next} && !$_->{request_open};
+        next unless ( $_->{next} && !$_->{request_open} ) || $_->{request_only};
+        my $service = $_;
         my $name = $_->{service_name};
         my $containers = $_->{request_containers};
         my $max = $_->{request_max};
@@ -145,7 +154,7 @@ sub construct_bin_request_form {
                 type => 'Checkbox',
                 apply => [
                     {
-                        when => { "quantity-$id" => sub { $_[0] > 0 } },
+                        when => { "quantity-$id" => sub { $max > 1 && $_[0] > 0 } },
                         check => qr/^1$/,
                         message => 'Please tick the box',
                     },
@@ -155,19 +164,27 @@ sub construct_bin_request_form {
                 tags => { toggle => "form-quantity-$id-row" },
             };
             $name = ''; # Only on first container
-            push @$field_list, "quantity-$id" => {
-                type => 'Select',
-                label => 'Quantity',
-                tags => {
-                    hint => "You can request a maximum of " . NUMWORDS($max) . " containers",
-                    initial_hidden => 1,
-                },
-                options => [
-                    { value => "", label => '-' },
-                    map { { value => $_, label => $_ } } (1..$max),
-                ],
-                required_when => { "container-$id" => 1 },
-            };
+            if ($max == 1) {
+                push @$field_list, "quantity-$id" => {
+                    type => 'Hidden',
+                    default => '1',
+                };
+            } else {
+                push @$field_list, "quantity-$id" => {
+                    type => 'Select',
+                    label => 'Quantity',
+                    tags => {
+                        hint => "You can request a maximum of " . NUMWORDS($max) . " containers",
+                        initial_hidden => 1,
+                    },
+                    options => [
+                        { value => "", label => '-' },
+                        map { { value => $_, label => $_ } } (1..$max),
+                    ],
+                    required_when => { "container-$id" => 1 },
+                };
+            }
+            $c->cobrand->call_hook("bin_request_form_extra_fields", $service, $id, $field_list);
         }
     }
 
@@ -195,16 +212,10 @@ sub request : Chained('property') : Args(0) {
 sub process_request_data : Private {
     my ($self, $c, $form) = @_;
     my $data = $form->saved_data;
-    my $address = $c->stash->{property}->{address};
     my @services = grep { /^container-/ && $data->{$_} } keys %$data;
     foreach (@services) {
         my ($id) = /container-(.*)/;
-        my $container = $c->stash->{containers}{$id};
-        my $quantity = $data->{"quantity-$id"};
-        $data->{title} = "Request new $container";
-        $data->{detail} = "Quantity: $quantity\n\n$address";
-        $c->set_param('Container_Type', $id);
-        $c->set_param('Quantity', $quantity);
+        $c->cobrand->call_hook("waste_munge_request_data", $id, $data);
         $c->forward('add_report', [ $data ]) or return;
         push @{$c->stash->{report_ids}}, $c->stash->{report}->id;
     }
@@ -217,7 +228,7 @@ sub construct_bin_report_form {
     my $field_list = [];
 
     foreach (@{$c->stash->{service_data}}) {
-        next unless $_->{last} && $_->{report_allowed} && !$_->{report_open};
+        next unless ( $_->{last} && $_->{report_allowed} && !$_->{report_open}) || $_->{report_only};
         my $id = $_->{service_id};
         my $name = $_->{service_name};
         push @$field_list, "service-$id" => {
@@ -251,14 +262,10 @@ sub report : Chained('property') : Args(0) {
 sub process_report_data : Private {
     my ($self, $c, $form) = @_;
     my $data = $form->saved_data;
-    my $address = $c->stash->{property}->{address};
     my @services = grep { /^service-/ && $data->{$_} } keys %$data;
     foreach (@services) {
         my ($id) = /service-(.*)/;
-        my $service = $c->stash->{services}{$id}{service_name};
-        $data->{title} = "Report missed $service";
-        $data->{detail} = "$data->{title}\n\n$address";
-        $c->set_param('service_id', $id);
+        $c->cobrand->call_hook("waste_munge_report_data", $id, $data);
         $c->forward('add_report', [ $data ]) or return;
         push @{$c->stash->{report_ids}}, $c->stash->{report}->id;
     }
@@ -290,6 +297,7 @@ sub enquiry : Chained('property') : Args(0) {
     my $field_list = [];
     foreach (@{$contact->get_metadata_for_input}) {
         next if $_->{code} eq 'service_id' || $_->{code} eq 'uprn' || $_->{code} eq 'property_id';
+        next if $_->{automated} eq 'hidden_field';
         my $type = 'Text';
         $type = 'TextArea' if 'text' eq ($_->{datatype} || '');
         my $required = $_->{required} eq 'true' ? 1 : 0;
@@ -322,9 +330,9 @@ sub enquiry : Chained('property') : Args(0) {
 sub process_enquiry_data : Private {
     my ($self, $c, $form) = @_;
     my $data = $form->saved_data;
-    my $address = $c->stash->{property}->{address};
-    $data->{title} = $data->{category};
-    $data->{detail} = "$data->{category}\n\n$address";
+
+    $c->cobrand->call_hook("waste_munge_enquiry_data", $data);
+
     # Read extra details in loop
     foreach (grep { /^extra_/ } keys %$data) {
         my ($id) = /^extra_(.*)/;
@@ -454,8 +462,6 @@ sub setup_categories_and_bodies : Private {
 
     $c->stash->{all_areas} = $c->stash->{all_areas_mapit} = { $c->cobrand->council_area_id => { id => $c->cobrand->council_area_id } };
     $c->forward('/report/new/setup_categories_and_bodies');
-    my $contacts = $c->stash->{contacts};
-    @$contacts = grep { grep { $_ eq 'Waste' } @{$_->groups} } @$contacts;
 }
 
 sub receive_echo_event_notification : Path('/waste/echo') : Args(0) {
