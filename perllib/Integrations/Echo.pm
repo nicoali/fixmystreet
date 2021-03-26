@@ -287,7 +287,7 @@ sub GetServiceUnitsForObject {
                 DatatypeName => 'LBB - GW Container',
                 ChildData => { ExtensibleDatum => [ {
                     DatatypeName => 'Quantity',
-                    Value => 1,
+                    Value => 2,
                 }, {
                     DatatypeName => 'Container',
                     Value => 44,
