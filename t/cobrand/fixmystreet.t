@@ -180,8 +180,8 @@ FixMyStreet::override_config {
 
 FixMyStreet::override_config {
     COBRAND_FEATURES => { borough_email_addresses => { fixmystreet => {
-        'graffiti@example' => [
-            { areas => [2397], email => 'district@wherever' },
+        'graffiti@northamptonshire' => [
+            { areas => [2397], email => 'graffiti@northampton' },
         ],
     } } },
     ALLOWED_COBRANDS => 'fixmystreet',
@@ -192,7 +192,7 @@ FixMyStreet::override_config {
         my $contact = $mech->create_contact_ok(
             body_id => $body->id,
             category => 'Graffiti',
-            email => 'graffiti@example',
+            email => 'graffiti@northamptonshire',
         );
 
         my ($report) = $mech->create_problems_for_body(1, $body->id, 'Title', {
@@ -204,7 +204,7 @@ FixMyStreet::override_config {
         FixMyStreet::Script::Reports::send();
         $mech->email_count_is(1);
         my @email = $mech->get_email;
-        is $email[0]->header('To'), 'Northampton <district@wherever>';
+        is $email[0]->header('To'), 'Northampton <graffiti@northampton>';
     };
 };
 
