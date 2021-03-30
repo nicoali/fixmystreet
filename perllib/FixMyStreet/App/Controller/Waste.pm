@@ -193,7 +193,11 @@ sub request : Chained('property') : Args(0) {
         request => {
             fields => [ grep { ! ref $_ } @$field_list, 'submit' ],
             title => 'Which containers do you need?',
-            next => 'about_you',
+            next => sub {
+                my $data = shift;
+                return 'replacement' if $data->{"container-44"}; # XXX
+                return 'about_you';
+            }
         },
     ];
     $c->stash->{field_list} = $field_list;
@@ -205,6 +209,7 @@ sub process_request_data : Private {
     my $data = $form->saved_data;
     my $address = $c->stash->{property}->{address};
     my @services = grep { /^container-/ && $data->{$_} } keys %$data;
+    my $reason = $data->{replacement_reason} || '';
     foreach (@services) {
         my ($id) = /container-(.*)/;
         my $container = $c->stash->{containers}{$id};
@@ -213,6 +218,14 @@ sub process_request_data : Private {
         $data->{detail} = "Quantity: $quantity\n\n$address";
         $c->set_param('Container_Type', $id);
         $c->set_param('Quantity', $quantity);
+        if ($reason eq 'damaged') {
+            $c->set_param('Action', 2); # Remove XXX
+            $c->set_param('Reason', 3); # Damaged XXX
+            $c->forward('add_report', [ $data ]) or return; # Additional remove report
+            $c->set_param('Action', 1); # Deliver
+        } elsif ($reason eq 'stolen' || $reason eq 'taken') {
+            $c->set_param('Reason', 1); # Missing / Stolen XXX
+        }
         $c->forward('add_report', [ $data ]) or return;
         push @{$c->stash->{report_ids}}, $c->stash->{report}->id;
     }
