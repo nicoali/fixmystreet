@@ -169,6 +169,7 @@ sub construct_bin_request_form {
                 push @$field_list, "quantity-$id" => {
                     type => 'Hidden',
                     default => '1',
+                    apply => [ { check => qr/^1$/ } ],
                 };
             } else {
                 push @$field_list, "quantity-$id" => {
@@ -203,7 +204,11 @@ sub request : Chained('property') : Args(0) {
         request => {
             fields => [ grep { ! ref $_ } @$field_list, 'submit' ],
             title => 'Which containers do you need?',
-            next => 'about_you',
+            next => sub {
+                my $data = shift;
+                return 'replacement' if $data->{"container-44"}; # XXX
+                return 'about_you';
+            }
         },
     ];
     $c->stash->{field_list} = $field_list;
@@ -214,6 +219,7 @@ sub process_request_data : Private {
     my ($self, $c, $form) = @_;
     my $data = $form->saved_data;
     my @services = grep { /^container-/ && $data->{$_} } keys %$data;
+    my $reason = $data->{replacement_reason} || '';
     foreach (@services) {
         my ($id) = /container-(.*)/;
         $c->cobrand->call_hook("waste_munge_request_data", $id, $data);

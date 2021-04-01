@@ -36,6 +36,8 @@ create_contact({ category => 'Report missed collection', email => 'missed@exampl
 create_contact({ category => 'Request new container', email => 'request@example.org' },
     { code => 'Quantity', required => 1, automated => 'hidden_field' },
     { code => 'Container_Type', required => 1, automated => 'hidden_field' },
+    { code => 'Action', required => 0, automated => 'hidden_field' },
+    { code => 'Reason', required => 0, automated => 'hidden_field' },
 );
 create_contact({ category => 'General enquiry', email => 'general@example.org' },
     { code => 'Notes', description => 'Notes', required => 1, datatype => 'text' });
@@ -167,6 +169,31 @@ FixMyStreet::override_config {
         is $report->get_extra_field_value('uprn'), 1000000002;
         is $report->get_extra_field_value('Quantity'), 2;
         is $report->get_extra_field_value('Container_Type'), 1;
+        is $report->get_extra_field_value('Action'), '';
+        is $report->get_extra_field_value('Reason'), '';
+    };
+    subtest 'Request a replacement garden container' => sub {
+        $mech->get_ok('/waste/12345/request');
+        $mech->submit_form_ok({ form_number => 2 });
+        $mech->content_contains('Please specify what you need');
+        $mech->submit_form_ok({ with_fields => { 'container-44' => 1, 'quantity-44' => 1 } });
+        $mech->submit_form_ok({ with_fields => { replacement_reason => 'damaged' } });
+        $mech->submit_form_ok({ with_fields => { name => "Test McTest", email => $user->email } });
+        $mech->content_contains('Garden Waste');
+        $mech->content_contains('Test McTest');
+        $mech->submit_form_ok({ with_fields => { process => 'summary' } });
+        $mech->content_contains('Your request has been sent');
+        my @reports = FixMyStreet::DB->resultset("Problem")->search(undef, { order_by => { -desc => 'id' }, rows => 2 });
+        is $reports[0]->get_extra_field_value('uprn'), 1000000002;
+        is $reports[0]->get_extra_field_value('Quantity'), 1;
+        is $reports[0]->get_extra_field_value('Container_Type'), 44;
+        is $reports[0]->get_extra_field_value('Reason'), 3;
+        is $reports[0]->get_extra_field_value('Action'), 1;
+        is $reports[1]->get_extra_field_value('uprn'), 1000000002;
+        is $reports[1]->get_extra_field_value('Quantity'), 1;
+        is $reports[1]->get_extra_field_value('Container_Type'), 44;
+        is $reports[1]->get_extra_field_value('Reason'), 3;
+        is $reports[1]->get_extra_field_value('Action'), 2;
     };
     subtest 'Thing already requested' => sub {
         $mech->get_ok('/waste/12345');
