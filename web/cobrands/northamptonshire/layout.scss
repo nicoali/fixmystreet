@@ -4,8 +4,8 @@
 
 #site-logo {
     width: 450px;
-    
-    // Prevents the wide double logo overlapping nav items at medium screen widths    
+
+    // Prevents the wide double logo overlapping nav items at medium screen widths
     @media (max-width: 60em) {
         width: 260px;
     }
@@ -44,7 +44,7 @@
         &:hover, &:visited {
             background-color: $primary_b;
         }
-        
+
     }
     span {
         color: $nav_header_colour;
@@ -53,7 +53,7 @@
         &:hover {
             color: $nav_header_colour;
         }
-        
+
     }
 }
 
