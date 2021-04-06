@@ -1,0 +1,47 @@
+[% INCLUDE header.html %]
+
+<div class="govuk-error-summary">
+    <h1 class="govuk-panel__title">
+        Payment cancelled
+    </h1>
+    <div class="govuk-panel__body">
+        <p>
+        You cancelled your attempt to pay by Direct Debit.
+        </p>
+    </div>
+</div>
+
+[% IF report %]
+<form name="post" method="post" action="[% payment_details.dd_push_url %]/pages/registration.aspx?.Client=[% payment_details.dd_client_id %]&.PaymentPlans=[% payment_details.dd_payment_plan %]">
+    <input type="hidden" name="txtTitle" id="txtTitle"  value="[% title %]" />
+    <input type="hidden" name="txtFirstName" id="txtFirstName"  value="[% first_name %]" />
+    <input type="hidden" name="txtSurname" id="txtSurname"  value="[% last_name %]" />
+    <input type="hidden" name="addr1" id="addr1"  value="[% address1 %]" />
+    <input type="hidden" name="addr2" id="addr2"  value="[% address2 %]" />
+    <input type="hidden" name="addr3" id="addr3" value="[% address3 %]" />
+    <input type="hidden" name="searchPostCode" id="searchPostCode"  value="[% postcode %]" />
+    <input type="hidden" name="txtAddressTown" id="txtAddressTown"  value="[% town %]" />
+    <input type="hidden" name="txtPhone" id="txtPhone"  value="[% phone %]" />
+    <input type="hidden" name="txtEmail" id="txtEmail"  value="[% email %]" />
+    <input type="hidden" name="txtAccountHolders" id="txtAccountHolders"  value="[% account_holder %]" />
+    <input type="hidden" name="txtReference" id="txtReference" value="[% reference %]" />
+    <input type="hidden" name="txtRegularAmount" id="txtRegularAmount"  value="[% amount %]" />
+    <input type="hidden" name="lstPaymentDay" value="[% day %]" />
+    <input type="hidden" name="PaymentMonth" value="[% month %]" />
+    <input type="hidden" name="PaymentYear" value="[% year %]" />
+    <input type="hidden" name="end" value="until_notice" />
+    <input type="hidden" name="arrayvars" value="productcode*|*WASTE*|*reference*|*[% reference %]">
+
+    <div class="govuk-form-group">
+        <p>
+        Retry to pay £[% amount %] for [% report.title %] by Direct Debit.
+        </p>
+    </div>
+
+    <div class="govuk-form-group">
+        <input class="govuk-button" type="submit" value="Retry">
+    </div>
+</form>
+[% END %]
+
+[% INCLUDE footer.html %]
