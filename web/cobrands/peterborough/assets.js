@@ -197,6 +197,9 @@ var flytipping_defaults = $.extend(true, {}, arcgis_defaults, {
         outFields: '',
       }
     },
+    // this prevents issues when public and non public land
+    // are right next to each other
+    nearest_radius: 0.1,
     stylemap: fixmystreet.assets.stylemap_invisible,
     asset_category: ['General fly tipping', 'Hazardous fly tipping', 'Offensive graffiti', 'Non offensive graffiti'  ],
     non_interactive: true,
@@ -234,10 +237,6 @@ fixmystreet.assets.add(flytipping_defaults, {
     http_options: {
       url: url_base + '3/query?',
     },
-    // this prevents issues when public and non public land
-    // are right next to each other and means that public
-    // land is preferred
-    nearest_radius: 0.1,
     actions: {
         found: function() {
             $("#js-roads-responsibility").removeClass("hidden");
