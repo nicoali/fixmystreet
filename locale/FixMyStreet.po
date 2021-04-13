@@ -40,7 +40,7 @@ msgstr ""
 
 #: templates/web/base/admin/users/import.html:42
 msgid "%d users already existed"
-msgstr ""
+msgstr "%d utenti già esistevano"
 
 #: templates/web/base/dashboard/heatmap.html:0 templates/web/base/dashboard/heatmap.html:9 templates/web/base/reports/body.html:0 templates/web/base/reports/body.html:26
 msgid "%s - Summary reports"
@@ -81,11 +81,11 @@ msgstr ""
 
 #: templates/web/base/status/stats.html:23
 msgid "%s live updates"
-msgstr ""
+msgstr "%s aggiornamenti in tempo reale"
 
 #: templates/web/base/dashboard/index.html:166 templates/web/base/dashboard/index.html:169
 msgid "%s opened, %s closed, %s fixed"
-msgstr ""
+msgstr "%s aperte, %s chiuse, %s risolte"
 
 #: templates/web/base/status/stats.html:25
 msgid "%s questionnaires sent &ndash; %s answered (%s%%)"
