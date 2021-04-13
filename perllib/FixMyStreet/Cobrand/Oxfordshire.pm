@@ -292,6 +292,19 @@ sub dashboard_export_problems_add_columns {
 sub defect_wfs_query {
     my ($self, $bbox) = @_;
 
+    my $bbox_xml = '';
+
+    if ($bbox) {
+        $bbox_xml = "
+        <ogc:BBOX>
+            <ogc:PropertyName>SHAPE_GEOMETRY</ogc:PropertyName>
+            <gml:Envelope xmlns:gml=\"http://www.opengis.net/gml\" srsName=\"$bbox->[4]\">
+                <gml:lowerCorner>$bbox->[0] $bbox->[1]</gml:lowerCorner>
+                <gml:upperCorner>$bbox->[2] $bbox->[3]</gml:upperCorner>
+            </gml:Envelope>
+        </ogc:BBOX>";
+    }
+
     my $filter = "
     <ogc:Filter xmlns:ogc=\"http://www.opengis.net/ogc\">
         <ogc:And>
@@ -299,13 +312,7 @@ sub defect_wfs_query {
                 <ogc:PropertyName>APPROVAL_STATUS_NAME</ogc:PropertyName>
                 <ogc:Literal>With Contractor</ogc:Literal>
             </ogc:PropertyIsEqualTo>
-            <ogc:BBOX>
-                <ogc:PropertyName>SHAPE_GEOMETRY</ogc:PropertyName>
-                <gml:Envelope xmlns:gml=\"http://www.opengis.net/gml\" srsName=\"$bbox->[4]\">
-                    <gml:lowerCorner>$bbox->[0] $bbox->[1]</gml:lowerCorner>
-                    <gml:upperCorner>$bbox->[2] $bbox->[3]</gml:upperCorner>
-                </gml:Envelope>
-            </ogc:BBOX>
+            $bbox_xml
         </ogc:And>
     </ogc:Filter>";
     $filter =~ s/\n\s+//g;
@@ -395,6 +402,12 @@ sub extra_around_pins {
     my $res = $self->pins_from_wfs(\@box);
 
     return $res;
+}
+
+sub extra_reports_pins {
+    my $self = shift;
+
+    return $self->pins_from_wfs;
 }
 
 1;

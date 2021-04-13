@@ -77,6 +77,19 @@ subtest 'check /around/nearby gets extra pins from wfs' => sub {
     }
 };
 
+subtest 'check /reports/Oxfordshire gets extra pins from wfs' => sub {
+    $mech->delete_problems_for_body($oxon->id);
+
+    FixMyStreet::override_config {
+        ALLOWED_COBRANDS => 'oxfordshire',
+        MAPIT_URL => 'http://mapit.uk/',
+    }, sub {
+        my $res = $mech->get_ok( "/reports/Oxfordshire" );
+        $mech->content_contains("Minor Carriageway (Pothole)\nEstimated completion date: Thursday  5 November 2020");
+        $mech->content_contains("Trees and Hedges (Overgrown/Overhanging)\nEstimated completion date: Thursday  5 November 2020");
+    }
+};
+
 $oxfordshire_cobrand->mock('defect_wfs_query', sub { return { features => [] }; });
 
 subtest 'check /around?ajax defaults to open reports only' => sub {
