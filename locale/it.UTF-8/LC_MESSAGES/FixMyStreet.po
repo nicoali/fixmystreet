@@ -141,7 +141,7 @@ msgstr "(chiuso)"
 
 #: templates/web/base/alert/_list_rss_local.html:8
 msgid "(covers roughly 200,000 people)"
-msgstr ""
+msgstr "(copre circa 200.000 persone)"
 
 #: templates/web/zurich/report/_item.html:19
 msgid "(fixed)"
@@ -177,7 +177,7 @@ msgstr "(inviato ad entrambi)"
 #. ("%s is a list of distance links, e.g. [2km] / [5km] / [10km] / [20km]")
 #: templates/web/base/alert/_list.html:29
 msgid "(we also have RSS feeds for problems within %s)"
-msgstr ""
+msgstr "(abbiamo anche feed RSS per problemi nel raggio di% s) "
 
 #: perllib/FixMyStreet/App/Controller/Report/New.pm:1606
 #: perllib/FixMyStreet/App/Controller/Report/New.pm:778
@@ -208,13 +208,13 @@ msgstr ""
 #: templates/web/base/dashboard/index.html:18
 #: templates/web/base/dashboard/status.html:11
 msgid "<h2>Reports, Statistics and Actions for</h2> <h1>%s</h1>"
-msgstr ""
+msgstr "<h2>Rapporti, Statistiche e Azioni per</h2> <h1>%s</h1> " 
 
 #. ("The first %s is a dropdown of all/fixed/etc, the second is a dropdown of categories")
 #: templates/web/base/admin/triage/_list-filters.html:24
 #: templates/web/base/reports/_list-filters.html:41
 msgid "<label for=\"statuses\">Show</label> %s reports <label for=\"filter_categories\">about</label> %s"
-msgstr ""
+msgstr "<label for=\"statuses\">Mostra</label> %s reports <label for=\"filter_categories\">about</label> %s"
 
 #. ("JS")
 #: templates/web/base/js/translation_strings.html:106
