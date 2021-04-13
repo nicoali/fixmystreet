@@ -780,7 +780,7 @@ sub _get_current_service_task {
         foreach ( @$task ) {
             my $end = construct_bin_date($_->{EndDate});
 
-            next if $end && $end < $last_date;
+            next if $last_date && $end && $end < $last_date;
             $last_date = $end;
             $current = $_;
         }
