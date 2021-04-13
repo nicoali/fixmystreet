@@ -6,6 +6,7 @@
 # Translators:
 # mySociety <transifex@mysociety.org>, 2020
 # Carmine Rosamilia <carmine.rosamilia24@gmail.com>, 2020
+# Domenico Aliotta <nicoaliotta@gmail.com>, 2021
 #
 #, fuzzy
 msgid ""
